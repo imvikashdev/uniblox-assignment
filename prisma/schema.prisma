@@ -21,3 +21,45 @@ model CartItem {
   @@unique([userId, itemId])
   @@index([userId])
 }
+
+model Order {
+  id             String      @id @default(uuid())
+  userId         String
+  subtotal       Decimal     @db.Decimal(10, 2)
+  discountCode   String? // Code used for this order, if any
+  discountAmount Decimal     @default(0.00) @db.Decimal(10, 2)
+  total          Decimal     @db.Decimal(10, 2)
+  createdAt      DateTime    @default(now())
+  items          OrderItem[]
+
+  @@index([userId])
+}
+
+model OrderItem {
+  id       String  @id @default(uuid())
+  orderId  String
+  itemId   String
+  name     String
+  price    Decimal @db.Decimal(10, 2)
+  quantity Int
+  order    Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+model DiscountCode {
+  id              String   @id @default(uuid())
+  code            String   @unique
+  discountPercent Decimal  @db.Decimal(5, 2)
+  isActive        Boolean  @default(true)
+  isUsed          Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  orderUsedInId   String?  @unique
+
+  @@index([isActive, isUsed])
+}
+
+model AppState {
+  id         String @id @default("singleton")
+  orderCount Int    @default(0)
+}
