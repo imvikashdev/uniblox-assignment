@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AddToCartDto } from './dto/cart.dto';
 import { CartItem } from '@prisma/client';
@@ -6,6 +6,8 @@ import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class CartService {
+  private readonly logger = new Logger(CartService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async addItem(dto: AddToCartDto): Promise<CartItem> {
@@ -37,7 +39,7 @@ export class CartService {
       },
     });
 
-    console.log(
+    this.logger.log(
       `Item ${itemId} added/updated for user ${userId}. New quantity: ${cartItem.quantity}`,
     );
     return cartItem;
@@ -59,7 +61,7 @@ export class CartService {
     const deleteResult = await this.prisma.cartItem.deleteMany({
       where: { userId: userId },
     });
-    console.log(
+    this.logger.log(
       `Cleared ${deleteResult.count} items from cart for user ${userId}.`,
     );
     return deleteResult;

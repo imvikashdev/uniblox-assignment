@@ -13,7 +13,7 @@ import ShortUniqueId from 'short-unique-id';
 import {
   DISCOUNT_PERCENTAGE,
   NTH_ORDER_FOR_DISCOUNT,
-} from 'src/utils/constants';
+} from '../utils/constants';
 
 @Injectable()
 export class OrderService {
