@@ -1,98 +1,265 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# NestJS E-commerce API Demo
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This project implements a backend API for a simple e-commerce store using NestJS, TypeScript, Prisma, and PostgreSQL. It includes functionality for managing shopping carts, processing checkouts, and a discount system where every Nth order generates a single-use discount code.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Features
 
-## Description
+- Add items to a user-specific cart (persisted in PostgreSQL).
+- Retrieve items currently in a user's cart.
+- Checkout items from the cart, creating an order.
+- Automatic generation of a 10% discount code after every Nth successful order (configurable via constants).
+- Validation and application of active, unused discount codes during checkout.
+- Discount codes are single-use and apply to the entire order value.
+- Admin endpoints to view statistics and the currently active discount code.
+- Database interactions managed via Prisma ORM.
+- Input validation using `class-validator` and `class-transformer`.
+- Unit tests for services using Jest.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Technology Stack
 
-## Project setup
+- **Backend Framework:** [NestJS](https://nestjs.com/) (Node.js)
+- **Language:** [TypeScript](https://www.typescriptlang.org/)
+- **Database:** [PostgreSQL](https://www.postgresql.org/)
+- **ORM:** [Prisma](https://www.prisma.io/)
+- **Validation:** `class-validator`, `class-transformer`
+- **Testing:** [Jest](https://jestjs.io/)
+- **Code Formatting:** Prettier, ESLint
 
-```bash
-$ npm install
-```
+## Prerequisites
 
-## Compile and run the project
+- [Node.js](https://nodejs.org/) (LTS version recommended, e.g., v20 or v22)
+- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+- [PostgreSQL](https://www.postgresql.org/download/) server running locally or accessible.
+- A tool to interact with PostgreSQL (e.g., `psql`, pgAdmin, DBeaver).
 
-```bash
-# development
-$ npm run start
+## Setup and Installation
 
-# watch mode
-$ npm run start:dev
+1.  **Clone the repository:**
 
-# production mode
-$ npm run start:prod
-```
+    ```bash
+    git clone https://github.com/imvikashdev/uniblox-assignment.git
+    cd uniblox-assignment
+    ```
 
-## Run tests
+2.  **Install dependencies:**
 
-```bash
-# unit tests
-$ npm run test
+    ```bash
+    npm install
+    # or
+    # yarn install
+    ```
 
-# e2e tests
-$ npm run test:e2e
+3.  **Setup PostgreSQL Database:**
 
-# test coverage
-$ npm run test:cov
-```
+    - Ensure your PostgreSQL server is running.
+    - Create a database for this project (e.g., `ecommerce_dev`). You can use a command like:
+      ```sql
+      CREATE DATABASE ecommerce_dev;
+      ```
 
-## Deployment
+4.  **Configure Environment Variables:**
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+    - Create a `.env` file in the project root directory by copying the example file:
+      ```bash
+      cp .env.example .env
+      ```
+      _(Note: If `.env.example` doesn't exist, create `.env` manually)_
+    - Edit the `.env` file and set the `DATABASE_URL` variable to match your PostgreSQL connection details:
+      ```dotenv
+      # .env
+      # Example: postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public
+      DATABASE_URL="postgresql://postgres:mysecretpassword@localhost:5432/ecommerce_dev?schema=public"
+      ```
+      **Important:** Replace the user, password, host, port, and database name with your actual credentials. Do **not** commit the `.env` file with real credentials to Git (it should be in your `.gitignore`).
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+5.  **Run Database Migrations:**
 
-```bash
-$ npm install -g mau
-$ mau deploy
-```
+    - This command applies the database schema defined in `prisma/schema.prisma` to your PostgreSQL database.
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+    ```bash
+    npx prisma migrate dev
+    ```
 
-## Resources
+    - Prisma will create the necessary tables (`CartItem`, `Order`, `OrderItem`, `DiscountCode`, `AppState`).
 
-Check out a few resources that may come in handy when working with NestJS:
+6.  **Generate Prisma Client:**
+    - Ensure the Prisma client is up-to-date with your schema (usually done by `migrate dev`, but good to run explicitly if needed).
+    ```bash
+    npx prisma generate
+    ```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Running the Application
 
-## Support
+- **Development Mode:**
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+  - Starts the application with hot-reloading.
 
-## Stay in touch
+  ```bash
+  npm run start:dev
+  # or
+  # yarn start:dev
+  ```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+  - The API will typically be available at `http://localhost:4000` (or the port specified in `src/main.ts`). Check the console output for the exact URL.
 
-## License
+- **Production Mode:**
+  ```bash
+  npm run build
+  npm run start:prod
+  # or
+  # yarn build
+  # yarn start:prod
+  ```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## Running Tests
+
+- Execute the Jest unit tests:
+
+  ```bash
+  npm test
+  # or
+  # yarn test
+  ```
+
+- Run tests in watch mode:
+
+  ```bash
+  npm run test:watch
+  # or
+  # yarn test:watch
+  ```
+
+- Run tests with coverage report:
+  ```bash
+  npm run test:cov
+  # or
+  # yarn test:cov
+  ```
+
+## API Endpoints
+
+**Base URL:** `http://localhost:3000` (default)
+
+---
+
+### Cart
+
+- **`POST /cart`**: Add Item to Cart
+
+  - **Request Body:** `AddToCartDto`
+    ```json
+    {
+      "userId": "string",
+      "itemId": "string",
+      "name": "string",
+      "price": number, // e.g., 19.99
+      "quantity": integer // e.g., 1
+    }
+    ```
+  - **Success Response (201 Created):**
+    ```json
+    {
+      "message": "Item added to cart successfully",
+      "item": {
+        /* CartItem object */
+      }
+    }
+    ```
+  - **Error Responses:** `400 Bad Request` (Validation errors)
+
+- **`GET /cart/:userId`**: Get User's Cart
+  - **URL Parameter:** `userId` (string)
+  - **Success Response (200 OK):**
+    ```json
+    [
+      {
+        /* CartItem object */
+      },
+      {
+        /* CartItem object */
+      }
+    ]
+    ```
+  - **Error Responses:** `404 Not Found`
+
+---
+
+### Order
+
+- **`POST /order/checkout`**: Checkout Cart
+  - **Request Body:** `CheckoutDto`
+    ```json
+    {
+      "userId": "string",
+      "discountCode": "string" // Optional
+    }
+    ```
+  - **Success Response (201 Created):**
+    ```json
+    {
+      "message": "Checkout successful!",
+      "order": {
+        "id": "string",
+        "userId": "string",
+        "subtotal": "string", // Decimal formatted as string
+        "discountCode": "string | null",
+        "discountAmount": "string", // Decimal formatted as string
+        "total": "string", // Decimal formatted as string
+        "createdAt": "string (ISO Date)",
+        "items": [
+          /* Array of OrderItem objects */
+        ]
+      }
+    }
+    ```
+  - **Error Responses:**
+    - `400 Bad Request` (Validation errors, cart total zero)
+    - `404 Not Found` (Cart empty)
+    - `500 Internal Server Error` (Transaction failure)
+
+---
+
+### Admin
+
+- **`GET /admin/discount/active`**: Get Active Discount Code
+
+  - **Success Response (200 OK):**
+    ```json
+    {
+      "activeDiscount": { /* DiscountCode object */ }
+    }
+    // or if none is active:
+    {
+      "activeDiscount": null
+    }
+    ```
+
+- **`GET /admin/stats`**: Get Store Statistics
+  - **Success Response (200 OK):**
+    ```json
+    {
+      "totalOrders": number,
+      "totalItemsPurchased": number,
+      "totalPurchaseAmount": "string", // Decimal formatted as string
+      "discountCodesGenerated": [ /* Array of DiscountCode objects */ ],
+      "discountCodesUsed": [ /* Array of DiscountCode objects */ ],
+      "totalDiscountAmount": "string" // Decimal formatted as string
+    }
+    ```
+
+---
+
+## Database Schema Overview
+
+- **`CartItem`**: Stores items currently in users' carts. Unique constraint on `(userId, itemId)`.
+- **`Order`**: Represents a completed order, including totals and applied discount info.
+- **`OrderItem`**: Represents individual items within a completed order, storing price/quantity at the time of purchase. Linked to `Order`.
+- **`DiscountCode`**: Stores generated discount codes, their percentage, and their status (`isActive`, `isUsed`). Only one code should be active at a time.
+- **`AppState`**: A singleton table (only one row) used to track the global `orderCount` for determining the Nth order.
+
+## Notes & Assumptions
+
+- **Authentication/Users:** This API does not implement user authentication. It relies on a `userId` string passed in requests. In a real application, this would be handled via proper authentication (e.g., JWT).
+- **Error Handling:** Basic error handling is implemented. More specific error types and messages could be added.
+- **Configuration:** Constants like `NTH_ORDER_FOR_DISCOUNT` and `DISCOUNT_PERCENTAGE` are hardcoded. In a real app, these should come from a configuration module (e.g., using `@nestjs/config`).
+- **Discount Code Generation:** Uses `short-unique-id` for slightly nicer codes than UUIDs. Uniqueness relies on the library's randomness and the database unique constraint.
